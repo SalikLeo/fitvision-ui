@@ -12,7 +12,7 @@ export interface CountRepsResponse {
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://jamarion-overliterary-comically.ngrok-free.dev";
+  "https://fitvision.medaide.org";
 
 export function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
