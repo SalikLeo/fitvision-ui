@@ -10,35 +10,26 @@ export interface CountRepsResponse {
   video: string;
 }
 
+export interface EquipmentDetectionItem {
+  label: string;
+  confidence: number;
+  box: number[];
+}
+
+export interface DetectEquipmentResponse {
+  detections: EquipmentDetectionItem[];
+  labels: string[];
+}
+
 const API_BASE =
   process.env.NEXT_PUBLIC_API_URL ??
   "https://fitvision.medaide.org";
 
-export function fileToBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result as string;
-      const base64 = result.includes(",") ? result.split(",")[1]! : result;
-      resolve(base64);
-    };
-    reader.onerror = () => reject(new Error("Failed to read video file."));
-    reader.readAsDataURL(file);
-  });
-}
-
-export async function countReps(
-  videoBase64: string,
-  exercise: Exercise,
-  backend: Backend,
-): Promise<CountRepsResponse> {
-  const endpoint =
-    backend === "mediapipe" ? "/count-reps-mediapipe" : "/count-reps";
-
+async function postJson<T>(endpoint: string, body: unknown): Promise<T> {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ video: videoBase64, exercise }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {
@@ -51,4 +42,49 @@ export async function countReps(
   }
 
   return response.json();
+}
+
+export function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.includes(",") ? result.split(",")[1]! : result;
+      resolve(base64);
+    };
+    reader.onerror = () => reject(new Error("Failed to read file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+export async function countReps(
+  videoBase64: string,
+  exercise: Exercise,
+  backend: Backend,
+): Promise<CountRepsResponse> {
+  const endpoint =
+    backend === "mediapipe" ? "/count-reps-mediapipe" : "/count-reps";
+
+  return postJson<CountRepsResponse>(endpoint, {
+    video: videoBase64,
+    exercise,
+  });
+}
+
+export async function detectEquipment(
+  imageBase64: string,
+): Promise<DetectEquipmentResponse> {
+  return postJson<DetectEquipmentResponse>("/detect-equipment", {
+    image: imageBase64,
+  });
+}
+
+export async function detectEquipmentVideo(
+  videoBase64: string,
+  sampleEvery = 30,
+): Promise<DetectEquipmentResponse> {
+  return postJson<DetectEquipmentResponse>("/detect-equipment-video", {
+    video: videoBase64,
+    sample_every: sampleEvery,
+  });
 }
