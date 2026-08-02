@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
-  type Backend,
   type CountRepsResponse,
   type DetectEquipmentResponse,
   type Exercise,
@@ -195,7 +194,6 @@ export default function RepCounterForm() {
   const [mode, setMode] = useState<Mode>("reps");
   const [file, setFile] = useState<File | null>(null);
   const [exercise, setExercise] = useState<Exercise>("pushup");
-  const [backend, setBackend] = useState<Backend>("tflite");
   const [sampleEvery, setSampleEvery] = useState(30);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -258,7 +256,7 @@ export default function RepCounterForm() {
       const payload = await fileToBase64(file);
 
       if (mode === "reps") {
-        const data = await countReps(payload, exercise, backend);
+        const data = await countReps(payload, exercise);
         setResult(data);
       } else if (mode === "equipment-image") {
         const data = await detectEquipment(payload);
@@ -397,61 +395,26 @@ export default function RepCounterForm() {
           </div>
 
           {mode === "reps" && (
-            <>
-              <div>
-                <label
-                  htmlFor="exercise"
-                  className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-400"
-                >
-                  Exercise
-                </label>
-                <select
-                  id="exercise"
-                  value={exercise}
-                  onChange={(e) => setExercise(e.target.value as Exercise)}
-                  className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                >
-                  {EXERCISES.map((key) => (
-                    <option key={key} value={key}>
-                      {EXERCISE_LABELS[key]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <fieldset>
-                <legend className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Backend
-                </legend>
-                <div className="grid grid-cols-2 gap-2">
-                  {(
-                    [
-                      ["tflite", "TFLite"],
-                      ["mediapipe", "MediaPipe"],
-                    ] as const
-                  ).map(([value, label]) => (
-                    <label
-                      key={value}
-                      className={`cursor-pointer rounded-lg border px-3 py-2.5 text-center text-sm font-medium transition-colors ${
-                        backend === value
-                          ? "border-emerald-500 bg-emerald-500/10 text-emerald-400"
-                          : "border-zinc-700 bg-zinc-950 text-zinc-400 hover:border-zinc-600"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="backend"
-                        value={value}
-                        checked={backend === value}
-                        onChange={() => setBackend(value)}
-                        className="sr-only"
-                      />
-                      {label}
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            </>
+            <div>
+              <label
+                htmlFor="exercise"
+                className="mb-2 block text-xs font-semibold uppercase tracking-wider text-zinc-400"
+              >
+                Exercise
+              </label>
+              <select
+                id="exercise"
+                value={exercise}
+                onChange={(e) => setExercise(e.target.value as Exercise)}
+                className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+              >
+                {EXERCISES.map((key) => (
+                  <option key={key} value={key}>
+                    {EXERCISE_LABELS[key]}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
 
           {mode === "equipment-video" && (

@@ -60,12 +60,8 @@ export function fileToBase64(file: File): Promise<string> {
 export async function countReps(
   videoBase64: string,
   exercise: Exercise,
-  backend: Backend,
 ): Promise<CountRepsResponse> {
-  const endpoint =
-    backend === "mediapipe" ? "/count-reps-mediapipe" : "/count-reps";
-
-  return postJson<CountRepsResponse>(endpoint, {
+  return postJson<CountRepsResponse>("/count-reps", {
     video: videoBase64,
     exercise,
   });
